@@ -1,0 +1,26 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo "Installing Terraform..."
+      - wget -q https://releases.hashicorp.com/terraform/1.14.6/terraform_1.14.6_linux_amd64.zip
+      - unzip -q terraform_1.14.6_linux_amd64.zip
+      - mv terraform /usr/local/bin/
+      - terraform --version
+
+  pre_build:
+    commands:
+      - echo "Running terraform init..."
+      - terraform init
+
+  build:
+    commands:
+      - echo "Running terraform plan..."
+      - terraform plan
+      - echo "Running terraform apply..."
+      - terraform apply -auto-approve
+
+  post_build:
+    commands:
+      - echo "Done! Infrastructure updated."

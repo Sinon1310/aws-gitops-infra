@@ -22,7 +22,7 @@ resource "aws_instance" "main" {
     yum install -y httpd
     systemctl start httpd
     systemctl enable httpd
-    echo "<h1>🚀 aws-gitops-infra is LIVE — Built by Sinon with Terraform</h1>" > /var/www/html/index.html
+  echo "<h1>🚀 aws-gitops-infra v2.0 — GitOps Pipeline Working! Built by Sinon 🔥</h1>" > /var/www/html/index.html
   EOF
 
   tags = {
