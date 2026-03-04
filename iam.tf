@@ -28,7 +28,8 @@ resource "aws_iam_role_policy" "codebuild_policy" {
           "dynamodb:*",
           "iam:*",
           "logs:*",
-          "codebuild:*"
+          "codebuild:*",
+          "codepipeline:*"
         ]
         Resource = "*"
       }
