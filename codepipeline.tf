@@ -1,9 +1,3 @@
-# GitHub Connection
-resource "aws_codestarconnections_connection" "github" {
-  name          = "${var.project_name}-github"
-  provider_type = "GitHub"
-}
-
 # CodePipeline
 resource "aws_codepipeline" "terraform_pipeline" {
   name     = "${var.project_name}-pipeline"
@@ -26,7 +20,7 @@ resource "aws_codepipeline" "terraform_pipeline" {
       output_artifacts = ["source_output"]
 
       configuration = {
-        ConnectionArn    = aws_codestarconnections_connection.github.arn
+        ConnectionArn    = "arn:aws:codestar-connections:ap-south-1:768289994925:connection/81fb4273-1c22-42c9-b09e-65a37d589d5f"
         FullRepositoryId = "Sinon1310/aws-gitops-infra"
         BranchName       = "main"
       }
