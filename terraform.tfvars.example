@@ -1,0 +1,14 @@
+# terraform.tfvars.example
+# Copy this file to terraform.tfvars and customize the values
+
+# AWS region where resources will be deployed
+aws_region = "ap-south-1"
+
+# Project name (used as prefix for all resources)
+project_name = "aws-gitops-infra"
+
+# Environment tag (dev, staging, prod)
+environment = "dev"
+
+# VPC CIDR block
+vpc_cidr = "10.0.0.0/16"

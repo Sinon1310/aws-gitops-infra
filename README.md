@@ -3,6 +3,16 @@
 > Production-grade GitOps infrastructure automation using Terraform + AWS CodePipeline.
 > Every Git push automatically provisions real AWS infrastructure — zero manual clicks.
 
+**🔴 LIVE DEMO**: [http://65.0.95.69](http://65.0.95.69)
+
+---
+
+## 📸 Live Dashboard
+
+![Dashboard Screenshot](.github/images/dashboard.png)
+
+The EC2 instance serves a live dashboard showing the GitOps workflow, infrastructure stats, and architecture details.
+
 ---
 
 ## 📌 What This Project Does
@@ -16,30 +26,36 @@ This project implements a **GitOps workflow** where:
 ---
 
 ## 🏗️ Architecture
+
+```mermaid
+graph TB
+    Dev[👨‍💻 Developer] -->|git push| GH[📦 GitHub Repository]
+    GH -->|CodeStar Connection| CP[⚙️ CodePipeline]
+    CP -->|triggers| CB[🔨 CodeBuild]
+    CB -->|terraform apply| AWS[☁️ AWS Resources]
+    
+    AWS --> VPC[🌐 VPC<br/>10.0.0.0/16]
+    VPC --> Subnet[Public Subnet<br/>10.0.1.0/24]
+    Subnet --> EC2[💻 EC2 t3.micro<br/>Apache Server<br/>65.0.95.69]
+    VPC --> IGW[🌍 Internet Gateway]
+    VPC --> SG[🔒 Security Groups<br/>Port 22, 80]
+    
+    AWS --> S3State[📦 S3 Bucket<br/>Terraform State]
+    AWS --> DDB[🔐 DynamoDB<br/>State Lock]
+    AWS --> CT[📊 CloudTrail<br/>Audit Logs]
+    AWS --> S3CT[📦 S3 Bucket<br/>CloudTrail Logs]
+    
+    EC2 -->|serves| Web[🌐 Live Dashboard<br/>http://65.0.95.69]
+    
+    style Dev fill:#4a9eff
+    style GH fill:#24292e
+    style CP fill:#ff9900
+    style CB fill:#ff9900
+    style EC2 fill:#ff9900
+    style Web fill:#00d084
 ```
-GitHub (Terraform code)
-        │
-        ▼
-AWS CodePipeline (triggered on push)
-        │
-        ├── Stage 1: Source (GitHub)
-        └── Stage 2: Deploy (CodeBuild → terraform apply)
-                │
-                ▼
-        ┌───────────────────────┐
-        │        VPC            │
-        │  ┌─────────────────┐  │
-        │  │  Public Subnet  │  │
-        │  │  EC2 t3.micro   │  │
-        │  │  Apache Server  │  │
-        │  └─────────────────┘  │
-        │  Internet Gateway     │
-        │  Security Groups      │
-        └───────────────────────┘
-                │
-        CloudTrail (audit every change)
-        S3 + DynamoDB (remote state)
-```
+
+**Flow**: Developer pushes Terraform code → GitHub triggers CodePipeline → CodeBuild runs `terraform apply` → AWS infrastructure updates → CloudTrail logs all changes
 
 ---
 
@@ -138,6 +154,36 @@ terraform destroy
 - Remote state management
 - Audit & compliance (CloudTrail)
 - Auto Scaling ready architecture
+
+---
+
+## 💰 Cost
+
+~$0/month (AWS Free Tier)
+
+---
+
+## 🧠 Challenges & Solutions
+
+### Challenge 1: CodeBuild Permission Denied
+**Problem**: `terraform plan` failed with `AccessDeniedException` when CodeBuild tried to read CodePipeline state  
+**Root Cause**: CodeBuild IAM role was missing `codepipeline:*` permissions  
+**Solution**: Added `codepipeline:*` to the CodeBuild role in `iam.tf` to allow it to manage the pipeline that manages itself (bootstrap paradox solved!)
+
+### Challenge 2: EC2 User Data Changes Ignored
+**Problem**: Updating the dashboard HTML in `user_data` didn't recreate the EC2 instance  
+**Root Cause**: Terraform doesn't replace instances by default when `user_data` changes  
+**Solution**: Set `user_data_replace_on_change = true` in the EC2 module, or manually force replacement with `terraform apply -replace="module.ec2.aws_instance.main"`
+
+### Challenge 3: State Lock Conflicts
+**Problem**: Pipeline occasionally failed with "Error acquiring state lock"  
+**Root Cause**: Previous build crashed without releasing the DynamoDB lock  
+**Solution**: Manually delete stuck lock entries in the `terraform-state-lock` DynamoDB table
+
+### Challenge 4: Region-Specific Free Tier
+**Problem**: `t2.micro` instances are not Free Tier eligible in `ap-south-1`  
+**Root Cause**: AWS Free Tier varies by region  
+**Solution**: Switched to `t3.micro` which is Free Tier eligible in Mumbai region
 
 ---
 
