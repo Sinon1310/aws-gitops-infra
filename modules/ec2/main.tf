@@ -47,7 +47,9 @@ resource "aws_instance" "main" {
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    padding: 60px 24px;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
   body::before {
     content: '';
@@ -75,8 +77,9 @@ resource "aws_instance" "main" {
     position: relative;
     z-index: 1;
     text-align: center;
-    padding: 40px 24px;
+    padding: 20px 24px;
     max-width: 900px;
+    width: 100%;
   }
   .status-bar {
     display: inline-flex;
